@@ -12,19 +12,36 @@ exports.create = (text, callback) => {
   // var id = counter.getNextUniqueId();
   // items[id] = text;
   // callback(null, { id, text });
-  counter.getNextUniqueId((err, id) => {
+
+  // counter.getNextUniqueId((err, id) => {
+  //   if (err) {
+  //     throw ('Error creating');
+  //   } else {
+  //     fs.writeFile(`${exports.dataDir}/${id}.txt`, text, (err) => {
+  //       if (err) {
+  //         throw ('error writing id');
+  //       } else {
+  //         callback(null, { id, text });
+  //       }
+  //     });
+  //   }
+  // });
+
+  return new Promise((resolve, reject) => {
+    counter.getNextUniqueId((err, id) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(id);
+      }
+    });
+  }).then((uniqueId) => fs.writeFile(`${exports.dataDir}/${uniqueId}.txt`, text, (err) => {
     if (err) {
-      throw ('Error creating');
+      throw ('error writing id');
     } else {
-      fs.writeFile(`${exports.dataDir}/${id}.txt`, text, (err) => {
-        if (err) {
-          throw ('error writing id');
-        } else {
-          callback(null, { id, text });
-        }
-      });
+      callback(null, { id: uniqueId, text });
     }
-  });
+  }));
 };
 
 exports.readAll = (callback) => {
@@ -60,12 +77,22 @@ exports.readOne = (id, callback) => {
   // } else {
   //   callback(null, { id, text });
   // }
-  fs.readFile(`${exports.dataDir}/${id}.txt`, 'utf8', (err, text) => {
-    if (err) {
-      callback(new Error(`No item with id: ${id}`));
-    } else {
-      callback(null, { id, text });
-    }
+
+  // fs.readFile(`${exports.dataDir}/${id}.txt`, 'utf8', (err, text) => {
+  //   if (err) {
+  //     callback(new Error(`No item with id: ${id}`));
+  //   } else {
+  //     callback(null, { id, text });
+  //   }
+  // });
+  return new Promise((resolve, reject) => {
+    fs.readFile(`${exports.dataDir}/${id}.txt`, 'utf8', (err, text) => {
+      if (err) {
+        callback(new Error(`No item with id: ${id}`));
+      } else {
+        resolve(callback(null, { id, text }));
+      }
+    });
   });
 };
 
@@ -77,19 +104,36 @@ exports.update = (id, text, callback) => {
   //   items[id] = text;
   //   callback(null, { id, text });
   // }
-  fs.readFile(`${exports.dataDir}/${id}.txt`, 'utf8', (err, file) => {
+
+  // fs.readFile(`${exports.dataDir}/${id}.txt`, 'utf8', (err, file) => {
+  //   if (err) {
+  //     callback(new Error(`No item with id: ${id}`));
+  //   } else {
+  //     fs.writeFile(`${exports.dataDir}/${id}.txt`, text, (err) => {
+  //       if (err) {
+  //         throw ('error writing when updating');
+  //       } else {
+  //         callback(null, { id, text });
+  //       }
+  //     });
+  //   }
+  // });
+
+  return new Promise((resolve, reject) => {
+    fs.readFile(`${exports.dataDir}/${id}.txt`, 'utf8', (err, file) => {
+      if (err) {
+        callback(new Error(`No item with id: ${id}`));
+      } else {
+        resolve();
+      }
+    });
+  }).then(() => fs.writeFile(`${exports.dataDir}/${id}.txt`, text, (err) => {
     if (err) {
-      callback(new Error(`No item with id: ${id}`));
+      throw ('error writing when updating');
     } else {
-      fs.writeFile(`${exports.dataDir}/${id}.txt`, text, (err) => {
-        if (err) {
-          throw ('error writing when updating');
-        } else {
-          callback(null, { id, text });
-        }
-      });
+      callback(null, { id, text });
     }
-  });
+  }));
 };
 
 exports.delete = (id, callback) => {
@@ -101,12 +145,23 @@ exports.delete = (id, callback) => {
   // } else { cc
   //   callback();
   // }
-  fs.unlink(`${exports.dataDir}/${id}.txt`, (err) => {
-    if (err) {
-      callback(new Error(`No item with id: ${id}`));
-    } else {
-      callback();
-    }
+
+  // fs.unlink(`${exports.dataDir}/${id}.txt`, (err) => {
+  //   if (err) {
+  //     callback(new Error(`No item with id: ${id}`));
+  //   } else {
+  //     callback();
+  //   }
+  // });
+
+  return new Promise((resolve, reject) => {
+    fs.unlink(`${exports.dataDir}/${id}.txt`, (err) => {
+      if (err) {
+        callback(new Error(`No item with id: ${id}`));
+      } else {
+        resolve(callback());
+      }
+    });
   });
 };
 

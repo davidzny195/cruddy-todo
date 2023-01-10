@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const sprintf = require('sprintf-js').sprintf;
+var Promise = require('bluebird');
 
 var counter = 0;
 
@@ -15,24 +16,43 @@ const zeroPaddedNumber = (num) => {
   return sprintf('%05d', num);
 };
 
-const readCounter = (callback) => {
-  fs.readFile(exports.counterFile, (err, fileData) => {
-    if (err) {
-      callback(null, 0);
-    } else {
-      callback(null, Number(fileData));
-    }
+const readCounter = () => {
+  // fs.readFile(exports.counterFile, (err, fileData) => {
+  //   if (err) {
+  //     callback(null, 0);
+  //   } else {
+  //     callback(null, Number(fileData));
+  //   }
+  // });
+  return new Promise((resolve, reject) => {
+    fs.readFile(exports.counterFile, (err, fileData) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(Number(fileData));
+      }
+    });
   });
 };
 
-const writeCounter = (count, callback) => {
+const writeCounter = (count) => {
   var counterString = zeroPaddedNumber(count);
-  fs.writeFile(exports.counterFile, counterString, (err) => {
-    if (err) {
-      throw ('error writing counter');
-    } else {
-      callback(null, counterString);
-    }
+  // fs.writeFile(exports.counterFile, counterString, (err) => {
+  //   if (err) {
+  //     throw ('error writing counter');
+  //   } else {
+  //     callback(null, counterString);
+  //   }
+  // });
+
+  return new Promise((resolve, reject) => {
+    fs.writeFile(exports.counterFile, counterString, (err) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(counterString);
+      }
+    });
   });
 };
 
@@ -41,20 +61,27 @@ const writeCounter = (count, callback) => {
 exports.getNextUniqueId = (callback) => {
   // counter = counter + 1;
   // return zeroPaddedNumber(counter);
-  readCounter((err, count) => {
-    if (err) {
-      throw ('Error reading counter');
-    } else {
-      count++;
-    }
-    writeCounter(count, (err, countString) => {
-      if (err) {
-        throw ('Error writing counter');
-      } else {
-        callback(null, countString);
-      }
-    });
-  });
+  // readCounter((err, count) => {
+  //   if (err) {
+  //     throw ('Error reading counter');
+  //   } else {
+  //     count++;
+  //   }
+  //   writeCounter(count, (err, countString) => {
+  //     if (err) {
+  //       throw ('Error writing counter');
+  //     } else {
+  //       callback(null, countString);
+  //     }
+  //   });
+  // });
+  return readCounter()
+    .then((counter) => {
+      counter++;
+      return writeCounter(counter);
+    })
+    .then((res) => callback(null, res))
+    .catch((err) => console.error(err));
 };
 
 
