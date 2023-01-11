@@ -14,17 +14,13 @@ exports.create = (text, callback) => {
   // callback(null, { id, text });
 
   // counter.getNextUniqueId((err, id) => {
-  //   if (err) {
-  //     throw ('Error creating');
-  //   } else {
   //     fs.writeFile(`${exports.dataDir}/${id}.txt`, text, (err) => {
   //       if (err) {
-  //         throw ('error writing id');
+  //         callback(err)
   //       } else {
   //         callback(null, { id, text });
   //       }
   //     });
-  //   }
   // });
 
   return new Promise((resolve, reject) => {
